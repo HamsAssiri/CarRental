@@ -1,7 +1,7 @@
 package validation;
 public class InputValidator {
 
-    private static final int MAX_PASSENGERS = 10;
+    private static final int MAX_PASSENGERS = 7;
     private static final int MAX_DAYS = 365;
     private static final int MAX_MILEAGE = 100000;
 
