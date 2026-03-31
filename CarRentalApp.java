@@ -9,6 +9,9 @@ import util.Messages;
 import display.CarDisplay;
 import display.ResultDisplay;
 import validation.InputValidator;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 
 /* 
@@ -19,8 +22,6 @@ import java.nio.charset.StandardCharsets;
 */
 
 // to fix any format problem 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Locale;
 
 public class CarRentalApp {
@@ -36,13 +37,10 @@ public class CarRentalApp {
         }
 */
 
-        // Force English locale for number formatting
+         // Force English locale for number formatting to ensure proper display
         Locale.setDefault(Locale.ENGLISH);
-        
-        // Set number formatting to use English digits
-        NumberFormat numberFormat = NumberFormat.getInstance(Locale.ENGLISH);
-        DecimalFormat decimalFormat = new DecimalFormat("#.##");
-        decimalFormat.setDecimalSeparatorAlwaysShown(false);
+        System.setProperty("user.country", "US");
+        System.setProperty("user.language", "en");
         
         // Override default formatter for numbers
         System.setProperty("user.country", "US");
@@ -94,7 +92,7 @@ public class CarRentalApp {
         // Find the BEST car(s) (lowest cost, then best comfort)
         List<CarWithDetails> bestCars = filterService.findBestCars(eligibleCars);
 
-        // 8. Display final results (only the best car(s))
+        // Display final results (only the best car(s))
         ResultDisplay resultDisplay = new ResultDisplay();
         resultDisplay.showResults(bestCars, input.getPassengers(), 
                                   input.getDays(), input.getMileage());

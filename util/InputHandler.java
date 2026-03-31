@@ -38,7 +38,7 @@ public class InputHandler {
                 continue; // عد للحلقة
             }
             if (!InputValidator.validatePassengers(value)) {
-                System.out.println("Value must be between 1 and " + 10);
+                System.out.println("Value must be between 1 and 7");
                 continue; // عد للحلقة
             }
             break; // صحيح، اكسر الحلقة
@@ -118,5 +118,5 @@ public class InputHandler {
         }
         return result.toString();
     }
-    
+
 }
