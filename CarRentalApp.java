@@ -10,8 +10,6 @@ import display.CarDisplay;
 import display.ResultDisplay;
 import validation.InputValidator;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.List;
 
 /* 
@@ -24,9 +22,51 @@ import java.nio.charset.StandardCharsets;
 // to fix any format problem 
 import java.util.Locale;
 
+import javax.swing.SwingUtilities;
+import java.util.Scanner;
+
 public class CarRentalApp {
 
     public static void main(String[] args) {
+        // Ask user which interface they want
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Select Interface:");
+        System.out.println("1. Terminal (Console)");
+        System.out.println("2. Graphical (GUI)");
+
+       String choice = "";
+        boolean valid = false;
+        
+        // Loop until valid input (1 or 2)
+        while (!valid) {
+            System.out.print("  Enter your choice (1 or 2): ");
+            choice = scanner.nextLine().trim();
+            
+            if (choice.equals("1") || choice.equals("2")) {
+                valid = true;
+            } else {
+                System.out.println("\n  Invalid choice! Please enter 1 or 2.\n");
+            }
+        }
+        
+        System.out.println();
+        
+        if (choice.equals("2")) {
+            // Launch GUI
+            System.out.println("  Launching Graphical Interface...");
+            SwingUtilities.invokeLater(() -> {
+                gui.CarRentalGUI.main(new String[0]);
+            });
+        } else {
+            // Run console version
+            System.out.println("  Launching Console Interface...\n");
+            consoleMain(args);
+        }
+        
+        scanner.close();
+    }
+
+       private static void consoleMain(String[] args) {
 /* 
          // Fix console encoding to support UTF-8
         try {
