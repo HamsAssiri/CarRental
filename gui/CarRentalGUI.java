@@ -10,15 +10,16 @@ import validation.InputValidator;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.List;
 
 /**
- * Minimalist Receipt-Style GUI for Car Rental Application
+ * Enhanced User-Friendly GUI for Car Rental Application
  */
 public class CarRentalGUI extends JFrame {
     
-    // Color scheme - clean and professional
+    // Color scheme
     private static final Color BACKGROUND = new Color(250, 250, 252);
     private static final Color CARD_BG = Color.WHITE;
     private static final Color PRIMARY = new Color(41, 128, 185);
@@ -26,6 +27,9 @@ public class CarRentalGUI extends JFrame {
     private static final Color BORDER = new Color(230, 230, 235);
     private static final Color SUCCESS = new Color(46, 125, 50);
     private static final Color WARNING = new Color(198, 40, 40);
+    private static final Color ERROR_BG = new Color(255, 235, 235);
+    private static final Color ERROR_BORDER = new Color(198, 40, 40);
+    private static final Color INFO_ICON = new Color(100, 116, 139);
     
     // Components
     private JTextField passengersField;
@@ -35,6 +39,13 @@ public class CarRentalGUI extends JFrame {
     private JPanel receiptPanel;
     private JScrollPane receiptScrollPane;
     private JLabel statusLabel;
+    private JDialog errorDialog;
+    private JTextArea errorMessageArea;
+    
+    // Store original borders for reset
+    private javax.swing.border.Border defaultPassengerBorder;
+    private javax.swing.border.Border defaultDaysBorder;
+    private javax.swing.border.Border defaultMileageBorder;
     
     // Services
     private CarLoader carLoader;
@@ -57,7 +68,7 @@ public class CarRentalGUI extends JFrame {
         setTitle("Car Rental System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        setSize(850, 700);
+        setSize(950, 750);
         setLocationRelativeTo(null);
         getContentPane().setBackground(BACKGROUND);
         
@@ -70,7 +81,7 @@ public class CarRentalGUI extends JFrame {
         mainContainer.add(createHeader(), BorderLayout.NORTH);
         
         // Center (Input + Receipt)
-        JPanel centerPanel = new JPanel(new GridLayout(1, 2, 20, 0));
+        JPanel centerPanel = new JPanel(new GridLayout(1, 2, 25, 0));
         centerPanel.setBackground(BACKGROUND);
         centerPanel.add(createInputPanel());
         centerPanel.add(createReceiptPanel());
@@ -79,30 +90,126 @@ public class CarRentalGUI extends JFrame {
         mainContainer.add(createFooter(), BorderLayout.SOUTH);
         
         add(mainContainer);
+        
+        // Store default borders
+        defaultPassengerBorder = passengersField.getBorder();
+        defaultDaysBorder = daysField.getBorder();
+        defaultMileageBorder = mileageField.getBorder();
+        
+        // Create error dialog
+        createErrorDialog();
+    }
+    
+    private void createErrorDialog() {
+        errorDialog = new JDialog(this, "Input Error", true);
+        errorDialog.setLayout(new BorderLayout());
+        errorDialog.setSize(420, 200);
+        errorDialog.setLocationRelativeTo(this);
+        errorDialog.getContentPane().setBackground(Color.WHITE);
+        
+        JPanel errorPanel = new JPanel(new BorderLayout());
+        errorPanel.setBackground(Color.WHITE);
+        errorPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        
+        // Error icon and message
+        JPanel messagePanel = new JPanel(new BorderLayout(10, 10));
+        messagePanel.setBackground(Color.WHITE);
+        
+        JLabel iconLabel = new JLabel("!");
+        iconLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        iconLabel.setForeground(WARNING);
+        iconLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        
+        errorMessageArea = new JTextArea();
+        errorMessageArea.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        errorMessageArea.setForeground(new Color(80, 80, 80));
+        errorMessageArea.setEditable(false);
+        errorMessageArea.setLineWrap(true);
+        errorMessageArea.setWrapStyleWord(true);
+        errorMessageArea.setBackground(Color.WHITE);
+        errorMessageArea.setBorder(null);
+        
+        messagePanel.add(iconLabel, BorderLayout.WEST);
+        messagePanel.add(errorMessageArea, BorderLayout.CENTER);
+        
+        // OK button
+        JButton okButton = new JButton("OK");
+        okButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        okButton.setBackground(PRIMARY);
+        okButton.setForeground(Color.WHITE);
+        okButton.setFocusPainted(false);
+        okButton.setBorderPainted(false);
+        okButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        okButton.setPreferredSize(new Dimension(80, 35));
+        okButton.addActionListener(e -> errorDialog.setVisible(false));
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.add(okButton);
+        
+        errorPanel.add(messagePanel, BorderLayout.CENTER);
+        errorPanel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        errorDialog.add(errorPanel, BorderLayout.CENTER);
+        errorDialog.getRootPane().setDefaultButton(okButton);
+    }
+    
+    private void showErrorDialog(String message) {
+        if (errorMessageArea != null) {
+            errorMessageArea.setText(message);
+        }
+        errorDialog.setVisible(true);
     }
     
     private JPanel createHeader() {
-        JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(BACKGROUND);
-        header.setBorder(new EmptyBorder(0, 0, 20, 0));
-        
-        JLabel title = new JLabel("CAR RENTAL SYSTEM");
-        title.setFont(new Font("Helvetica Neue", Font.BOLD, 24));
-        title.setForeground(PRIMARY);
-        
-        JLabel subtitle = new JLabel("find your optimal ride");
-        subtitle.setFont(new Font("Helvetica Neue", Font.PLAIN, 11));
-        subtitle.setForeground(ACCENT);
-        
-        JPanel textPanel = new JPanel(new GridLayout(2, 1));
-        textPanel.setBackground(BACKGROUND);
-        textPanel.add(title);
-        textPanel.add(subtitle);
-        
-        header.add(textPanel, BorderLayout.WEST);
-        
-        return header;
+    JPanel header = new JPanel(new BorderLayout());
+    header.setBackground(BACKGROUND);
+    header.setBorder(new EmptyBorder(0, 0, 20, 0));
+    
+    JLabel title = new JLabel("CAR RENTAL SYSTEM");
+    title.setFont(new Font("Segoe UI", Font.BOLD, 28));
+    title.setForeground(PRIMARY);
+    
+    JLabel subtitle = new JLabel("find your optimal ride");
+    subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+    subtitle.setForeground(ACCENT);
+    
+    JPanel textPanel = new JPanel(new GridLayout(2, 1));
+    textPanel.setBackground(BACKGROUND);
+    textPanel.add(title);
+    textPanel.add(subtitle);
+    
+    // Info icon with tooltip
+    JLabel infoIcon = new JLabel("( i )");
+    infoIcon.setFont(new Font("Segoe UI", Font.BOLD, 12));
+    infoIcon.setForeground(PRIMARY);
+    infoIcon.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    infoIcon.setToolTipText("<html><body style='width:220px; padding:10px; font-family:Segoe UI;'>"
+        + "<b>Car Capacity Guide</b><br><br>"
+        + "• Economy: 1-4 passengers<br>"
+        + "• Intermediate: 1-4 passengers<br>"
+        + "• Standard: 1-5 passengers<br>"
+        + "• Van: 1-7 passengers<br><br>"
+        + "<i>Gas price: $2.25 per gallon</i>"
+        + "</body></html>");
+
+        // Alternative: Show tooltip on click if hover doesn't work
+    infoIcon.addMouseListener(new java.awt.event.MouseAdapter() {
+    public void mouseEntered(java.awt.event.MouseEvent evt) {
+        // Tooltip should show on hover automatically
+        // This is just to ensure the component is interactive
     }
+});
+    
+    JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    rightPanel.setBackground(BACKGROUND);
+    rightPanel.add(infoIcon);
+    
+    header.add(textPanel, BorderLayout.WEST);
+    header.add(rightPanel, BorderLayout.EAST);
+    
+    return header;
+}
     
     private JPanel createInputPanel() {
         JPanel panel = new JPanel();
@@ -115,43 +222,45 @@ public class CarRentalGUI extends JFrame {
         
         // Input title
         JLabel inputTitle = new JLabel("TRIP DETAILS");
-        inputTitle.setFont(new Font("Helvetica Neue", Font.BOLD, 13));
-        inputTitle.setForeground(ACCENT);
+        inputTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        inputTitle.setForeground(PRIMARY);
         inputTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(inputTitle);
         panel.add(Box.createRigidArea(new Dimension(0, 20)));
         
-        // Passengers
-        panel.add(createFieldGroup("PASSENGERS", passengersField = createSmallField(), "1-7"));
+        // Passengers with placeholder
+        passengersField = createStyledTextField("e.g., 4");
+        panel.add(createFieldGroup("NUMBER OF PASSENGERS", passengersField, "1-7 people"));
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
         
-        // Days
-        panel.add(createFieldGroup("DAYS", daysField = createSmallField(), "1-365"));
+        // Days with placeholder
+        daysField = createStyledTextField("e.g., 5");
+        panel.add(createFieldGroup("RENTAL DAYS", daysField, "1-365 days"));
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
         
-        // Mileage
-        panel.add(createFieldGroup("MILEAGE (miles)", mileageField = createSmallField(), "1-100,000"));
-        panel.add(Box.createRigidArea(new Dimension(0, 25)));
+        // Mileage with placeholder
+        mileageField = createStyledTextField("e.g., 250");
+        panel.add(createFieldGroup("TRIP MILEAGE", mileageField, "1-100,000 miles"));
+        panel.add(Box.createRigidArea(new Dimension(0, 20)));
         
-        // Gas info
-        JLabel gasInfo = new JLabel("gas price: $2.25 / gallon");
-        gasInfo.setFont(new Font("Helvetica Neue", Font.ITALIC, 10));
+        // Gas price info
+        JLabel gasInfo = new JLabel("Gas price: $2.25 per gallon");
+        gasInfo.setFont(new Font("Segoe UI", Font.ITALIC, 10));
         gasInfo.setForeground(ACCENT);
         gasInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(gasInfo);
-        
-        panel.add(Box.createRigidArea(new Dimension(0, 25)));
+        panel.add(Box.createRigidArea(new Dimension(0, 15)));
         
         // Calculate button
-        calculateButton = new JButton("CALCULATE");
-        calculateButton.setFont(new Font("Helvetica Neue", Font.BOLD, 12));
+        calculateButton = new JButton("FIND BEST CAR");
+        calculateButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
         calculateButton.setBackground(PRIMARY);
         calculateButton.setForeground(Color.WHITE);
         calculateButton.setFocusPainted(false);
         calculateButton.setBorderPainted(false);
         calculateButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         calculateButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        calculateButton.setPreferredSize(new Dimension(120, 40));
+        calculateButton.setPreferredSize(new Dimension(180, 45));
         
         calculateButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
@@ -168,17 +277,70 @@ public class CarRentalGUI extends JFrame {
         return panel;
     }
     
+    private JTextField createStyledTextField(String placeholder) {
+        JTextField field = new JTextField();
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        field.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(BORDER, 1, true),
+            new EmptyBorder(10, 12, 10, 12)
+        ));
+        field.setPreferredSize(new Dimension(200, 40));
+        
+        // Add placeholder text
+        field.putClientProperty("placeholder", placeholder);
+        field.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                if (field.getText().equals(placeholder)) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
+                resetFieldBorder(field);
+            }
+            
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                if (field.getText().trim().isEmpty()) {
+                    field.setText(placeholder);
+                    field.setForeground(Color.GRAY);
+                }
+            }
+        });
+        
+        // Set initial placeholder
+        field.setText(placeholder);
+        field.setForeground(Color.GRAY);
+        
+        return field;
+    }
+    
+    private void resetFieldBorder(JTextField field) {
+        field.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(BORDER, 1, true),
+            new EmptyBorder(10, 12, 10, 12)
+        ));
+        field.setBackground(Color.WHITE);
+    }
+    
+    private void highlightInvalidField(JTextField field) {
+        field.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(ERROR_BORDER, 2, true),
+            new EmptyBorder(9, 11, 9, 11)
+        ));
+        field.setBackground(ERROR_BG);
+    }
+    
     private JPanel createFieldGroup(String label, JTextField field, String hint) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(CARD_BG);
         
         JLabel labelComp = new JLabel(label);
-        labelComp.setFont(new Font("Helvetica Neue", Font.PLAIN, 10));
+        labelComp.setFont(new Font("Segoe UI", Font.BOLD, 11));
         labelComp.setForeground(ACCENT);
         
         JLabel hintComp = new JLabel(hint);
-        hintComp.setFont(new Font("Helvetica Neue", Font.PLAIN, 9));
-        hintComp.setForeground(new Color(180, 180, 180));
+        hintComp.setFont(new Font("Segoe UI", Font.PLAIN, 9));
+        hintComp.setForeground(new Color(160, 160, 160));
         
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(CARD_BG);
@@ -189,17 +351,6 @@ public class CarRentalGUI extends JFrame {
         panel.add(field, BorderLayout.CENTER);
         
         return panel;
-    }
-    
-    private JTextField createSmallField() {
-        JTextField field = new JTextField();
-        field.setFont(new Font("Helvetica Neue", Font.PLAIN, 14));
-        field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER, 1),
-            new EmptyBorder(8, 10, 8, 10)
-        ));
-        field.setPreferredSize(new Dimension(180, 35));
-        return field;
     }
     
     private JPanel createReceiptPanel() {
@@ -216,8 +367,8 @@ public class CarRentalGUI extends JFrame {
         receiptHeader.setBorder(new EmptyBorder(0, 0, 15, 0));
         
         JLabel receiptTitle = new JLabel("RECEIPT");
-        receiptTitle.setFont(new Font("Helvetica Neue", Font.BOLD, 11));
-        receiptTitle.setForeground(ACCENT);
+        receiptTitle.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        receiptTitle.setForeground(PRIMARY);
         
         JSeparator separator = new JSeparator();
         separator.setForeground(BORDER);
@@ -248,29 +399,38 @@ public class CarRentalGUI extends JFrame {
     private void showWelcomeReceipt() {
         receiptPanel.removeAll();
         
-        JPanel welcome = createReceiptItem();
+        JPanel welcome = new JPanel();
+        welcome.setLayout(new BoxLayout(welcome, BoxLayout.Y_AXIS));
+        welcome.setBackground(CARD_BG);
+        welcome.setBorder(new EmptyBorder(40, 20, 40, 20));
         welcome.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JLabel icon = new JLabel("◉");
-        icon.setFont(new Font("Helvetica Neue", Font.PLAIN, 40));
+        JLabel icon = new JLabel("[ ]");
+        icon.setFont(new Font("Segoe UI", Font.PLAIN, 56));
         icon.setForeground(PRIMARY);
         icon.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JLabel title = new JLabel("ready");
-        title.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
-        title.setForeground(ACCENT);
+        JLabel title = new JLabel("Ready to find your car");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        title.setForeground(PRIMARY);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JLabel desc = new JLabel("enter trip details to calculate");
-        desc.setFont(new Font("Helvetica Neue", Font.PLAIN, 10));
-        desc.setForeground(new Color(160, 160, 160));
+        JLabel desc = new JLabel("Enter your trip details on the left");
+        desc.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        desc.setForeground(new Color(120, 120, 120));
         desc.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        JLabel desc2 = new JLabel("and click FIND BEST CAR");
+        desc2.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        desc2.setForeground(new Color(120, 120, 120));
+        desc2.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         welcome.add(icon);
         welcome.add(Box.createRigidArea(new Dimension(0, 15)));
         welcome.add(title);
-        welcome.add(Box.createRigidArea(new Dimension(0, 5)));
+        welcome.add(Box.createRigidArea(new Dimension(0, 8)));
         welcome.add(desc);
+        welcome.add(desc2);
         
         receiptPanel.add(welcome);
         receiptPanel.add(Box.createVerticalGlue());
@@ -278,111 +438,162 @@ public class CarRentalGUI extends JFrame {
         receiptPanel.repaint();
     }
     
-    private JPanel createReceiptItem() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(CARD_BG);
-        panel.setBorder(new EmptyBorder(10, 0, 10, 0));
-        return panel;
+    private void resetFieldBorders() {
+        resetFieldBorder(passengersField);
+        resetFieldBorder(daysField);
+        resetFieldBorder(mileageField);
+    }
+    
+    private String getActualText(JTextField field, String placeholder) {
+        String text = field.getText().trim();
+        if (text.equals(placeholder)) {
+            return "";
+        }
+        return text;
     }
     
     private void setupEventHandlers() {
         calculateButton.addActionListener(e -> calculateBestCar());
-        passengersField.addActionListener(e -> calculateBestCar());
-        daysField.addActionListener(e -> calculateBestCar());
-        mileageField.addActionListener(e -> calculateBestCar());
     }
     
     private void calculateBestCar() {
+        resetFieldBorders();
         showLoadingReceipt();
         
-        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-            private String error;
-            private List<CarWithDetails> bestCars;
-            private UserInput input;
-            
-            @Override
-            protected Void doInBackground() {
-                try {
-                    int passengers, days, mileage;
-                    
-                    try {
-                        passengers = Integer.parseInt(passengersField.getText().trim());
-                        days = Integer.parseInt(daysField.getText().trim());
-                        mileage = Integer.parseInt(mileageField.getText().trim());
-                    } catch (NumberFormatException ex) {
-                        error = "invalid input";
-                        return null;
-                    }
-                    
-                    if (!InputValidator.validatePassengers(passengers)) {
-                        error = "passengers must be 1-7";
-                        return null;
-                    }
-                    if (!InputValidator.validateDays(days)) {
-                        error = "days must be 1-365";
-                        return null;
-                    }
-                    if (!InputValidator.validateMileage(mileage)) {
-                        error = "mileage must be 1-100,000";
-                        return null;
-                    }
-                    
-                    input = new UserInput(passengers, days, mileage);
-                    
-                    if (allCars == null || allCars.isEmpty()) {
-                        error = "no cars available";
-                        return null;
-                    }
-                    
-                    List<CarWithDetails> eligibleCars = filterService.filterByPassengers(allCars, input);
-                    
-                    if (eligibleCars.isEmpty()) {
-                        error = "no_cars";
-                        return null;
-                    }
-                    
-                    costCalculator.calculateAllCosts(eligibleCars, input);
-                    bestCars = filterService.findBestCars(eligibleCars);
-                    
-                } catch (IllegalArgumentException ex) {
-                    error = ex.getMessage();
-                } catch (Exception ex) {
-                    error = "system error";
-                }
-                return null;
-            }
-            
-            @Override
-            protected void done() {
-                if (error != null) {
-                    if (error.equals("no_cars")) {
-                        showNoCarsReceipt(input.getPassengers());
-                    } else {
-                        showErrorReceipt(error);
-                    }
-                } else {
-                    showReceipt(bestCars, input);
-                    statusLabel.setText("● calculated: " + bestCars.size() + " best car(s)");
-                }
-            }
-        };
+        String passengersPlaceholder = "e.g., 4";
+        String daysPlaceholder = "e.g., 5";
+        String mileagePlaceholder = "e.g., 250";
         
-        worker.execute();
+        String passengersStr = getActualText(passengersField, passengersPlaceholder);
+        String daysStr = getActualText(daysField, daysPlaceholder);
+        String mileageStr = getActualText(mileageField, mileagePlaceholder);
+        
+        int passengers = 0, days = 0, mileage = 0;
+        boolean hasError = false;
+        StringBuilder errorMsg = new StringBuilder();
+        
+        // Validate passengers
+        if (passengersStr.isEmpty()) {
+            highlightInvalidField(passengersField);
+            errorMsg.append("• Please enter number of passengers\n");
+            hasError = true;
+        } else {
+            try {
+                passengers = Integer.parseInt(passengersStr);
+                if (!InputValidator.validatePassengers(passengers)) {
+                    highlightInvalidField(passengersField);
+                    errorMsg.append("• Passengers must be between 1 and 7\n");
+                    hasError = true;
+                }
+            } catch (NumberFormatException e) {
+                highlightInvalidField(passengersField);
+                errorMsg.append("• Passengers must be a valid number\n");
+                hasError = true;
+            }
+        }
+        
+        // Validate days
+        if (daysStr.isEmpty()) {
+            highlightInvalidField(daysField);
+            errorMsg.append("• Please enter number of rental days\n");
+            hasError = true;
+        } else {
+            try {
+                days = Integer.parseInt(daysStr);
+                if (!InputValidator.validateDays(days)) {
+                    highlightInvalidField(daysField);
+                    errorMsg.append("• Rental days must be between 1 and 365\n");
+                    hasError = true;
+                }
+            } catch (NumberFormatException e) {
+                highlightInvalidField(daysField);
+                errorMsg.append("• Rental days must be a valid number\n");
+                hasError = true;
+            }
+        }
+        
+        // Validate mileage
+        if (mileageStr.isEmpty()) {
+            highlightInvalidField(mileageField);
+            errorMsg.append("• Please enter trip mileage");
+            hasError = true;
+        } else {
+            try {
+                mileage = Integer.parseInt(mileageStr);
+                if (!InputValidator.validateMileage(mileage)) {
+                    highlightInvalidField(mileageField);
+                    errorMsg.append("• Mileage must be between 1 and 100,000\n");
+                    hasError = true;
+                }
+            } catch (NumberFormatException e) {
+                highlightInvalidField(mileageField);
+                errorMsg.append("• Mileage must be a valid number\n");
+                hasError = true;
+            }
+        }
+        
+        if (hasError) {
+            showErrorDialog(errorMsg.toString());
+            showWelcomeReceipt();
+            statusLabel.setText("! error: please fix the highlighted fields");
+            return;
+        }
+        
+        UserInput input;
+        try {
+            input = new UserInput(passengers, days, mileage);
+        } catch (IllegalArgumentException ex) {
+            showErrorDialog(ex.getMessage());
+            showWelcomeReceipt();
+            statusLabel.setText("! error: " + ex.getMessage());
+            return;
+        }
+        
+        if (allCars == null || allCars.isEmpty()) {
+            showErrorDialog("No cars available. Please check data/cars.json");
+            showWelcomeReceipt();
+            statusLabel.setText("! error: no cars loaded");
+            return;
+        }
+        
+        List<CarWithDetails> eligibleCars = filterService.filterByPassengers(allCars, input);
+        
+        if (eligibleCars.isEmpty()) {
+            showNoCarsReceipt(passengers);
+            statusLabel.setText("! no cars for " + passengers + " passengers");
+            return;
+        }
+        
+        costCalculator.calculateAllCosts(eligibleCars, input);
+        List<CarWithDetails> bestCars = filterService.findBestCars(eligibleCars);
+        
+        showReceipt(bestCars, input);
+        statusLabel.setText("v calculated: " + bestCars.size() + " best car(s)");
     }
     
     private void showLoadingReceipt() {
         receiptPanel.removeAll();
         
-        JPanel loading = createReceiptItem();
+        JPanel loading = new JPanel();
+        loading.setLayout(new BoxLayout(loading, BoxLayout.Y_AXIS));
+        loading.setBackground(CARD_BG);
+        loading.setBorder(new EmptyBorder(50, 20, 50, 20));
         loading.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JLabel text = new JLabel("calculating...");
-        text.setFont(new Font("Helvetica Neue", Font.ITALIC, 11));
+        JProgressBar progressBar = new JProgressBar();
+        progressBar.setIndeterminate(true);
+        progressBar.setPreferredSize(new Dimension(200, 20));
+        progressBar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        JLabel text = new JLabel("Calculating best car for your trip...");
+        text.setFont(new Font("Segoe UI", Font.ITALIC, 11));
         text.setForeground(ACCENT);
         text.setAlignmentX(Component.CENTER_ALIGNMENT);
         
+        loading.add(progressBar);
+        loading.add(Box.createRigidArea(new Dimension(0, 15)));
         loading.add(text);
+        
         receiptPanel.add(loading);
         receiptPanel.revalidate();
         receiptPanel.repaint();
@@ -391,7 +602,6 @@ public class CarRentalGUI extends JFrame {
     private void showReceipt(List<CarWithDetails> cars, UserInput input) {
         receiptPanel.removeAll();
         
-        // Trip details section
         addReceiptSection("TRIP SUMMARY");
         addReceiptLine("passengers", String.valueOf(input.getPassengers()));
         addReceiptLine("rental days", String.valueOf(input.getDays()));
@@ -419,7 +629,6 @@ public class CarRentalGUI extends JFrame {
         receiptPanel.revalidate();
         receiptPanel.repaint();
         
-        // Scroll to top
         SwingUtilities.invokeLater(() -> receiptScrollPane.getVerticalScrollBar().setValue(0));
     }
     
@@ -429,7 +638,7 @@ public class CarRentalGUI extends JFrame {
         section.setBorder(new EmptyBorder(8, 0, 8, 0));
         
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Helvetica Neue", Font.BOLD, 10));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 11));
         titleLabel.setForeground(PRIMARY);
         
         JSeparator sep = new JSeparator();
@@ -447,11 +656,11 @@ public class CarRentalGUI extends JFrame {
         line.setBorder(new EmptyBorder(3, 0, 3, 0));
         
         JLabel labelComp = new JLabel(label);
-        labelComp.setFont(new Font("Helvetica Neue", Font.PLAIN, 11));
+        labelComp.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         labelComp.setForeground(new Color(100, 100, 100));
         
         JLabel valueComp = new JLabel(value);
-        valueComp.setFont(new Font("Helvetica Neue", Font.BOLD, 11));
+        valueComp.setFont(new Font("Segoe UI", Font.BOLD, 11));
         valueComp.setForeground(ACCENT);
         
         line.add(labelComp, BorderLayout.WEST);
@@ -467,14 +676,13 @@ public class CarRentalGUI extends JFrame {
         carPanel.setBorder(new EmptyBorder(5, 0, 5, 0));
         
         JLabel nameLabel = new JLabel(String.format("%d. %s", index, car.getName()));
-        nameLabel.setFont(new Font("Helvetica Neue", Font.BOLD, 12));
-        nameLabel.setForeground(ACCENT);
+        nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        nameLabel.setForeground(PRIMARY);
         
         carPanel.add(nameLabel);
         carPanel.add(Box.createRigidArea(new Dimension(0, 8)));
         
-        // Details in columns
-        JPanel details = new JPanel(new GridLayout(2, 3, 15, 6));
+        JPanel details = new JPanel(new GridLayout(2, 3, 12, 6));
         details.setBackground(CARD_BG);
         details.setBorder(new EmptyBorder(0, 0, 8, 0));
         
@@ -487,17 +695,16 @@ public class CarRentalGUI extends JFrame {
         
         carPanel.add(details);
         
-        // Total cost
         JPanel totalLine = new JPanel(new BorderLayout());
         totalLine.setBackground(CARD_BG);
-        totalLine.setBorder(new EmptyBorder(5, 0, 0, 0));
+        totalLine.setBorder(new EmptyBorder(8, 0, 0, 0));
         
-        JLabel totalLabel = new JLabel("total cost");
-        totalLabel.setFont(new Font("Helvetica Neue", Font.PLAIN, 10));
-        totalLabel.setForeground(new Color(100, 100, 100));
+        JLabel totalLabel = new JLabel("TOTAL COST");
+        totalLabel.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        totalLabel.setForeground(ACCENT);
         
         JLabel totalValue = new JLabel(String.format("$%.2f", car.getTotalCost()));
-        totalValue.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
+        totalValue.setFont(new Font("Segoe UI", Font.BOLD, 18));
         totalValue.setForeground(SUCCESS);
         
         totalLine.add(totalLabel, BorderLayout.WEST);
@@ -513,11 +720,11 @@ public class CarRentalGUI extends JFrame {
         panel.setBackground(CARD_BG);
         
         JLabel labelComp = new JLabel(label);
-        labelComp.setFont(new Font("Helvetica Neue", Font.PLAIN, 9));
+        labelComp.setFont(new Font("Segoe UI", Font.PLAIN, 9));
         labelComp.setForeground(new Color(140, 140, 140));
         
         JLabel valueComp = new JLabel(value);
-        valueComp.setFont(new Font("Helvetica Neue", Font.PLAIN, 10));
+        valueComp.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         valueComp.setForeground(ACCENT);
         
         panel.add(labelComp, BorderLayout.NORTH);
@@ -545,8 +752,8 @@ public class CarRentalGUI extends JFrame {
         JSeparator sep = new JSeparator();
         sep.setForeground(BORDER);
         
-        JLabel note = new JLabel("◉ lowest cost • best comfort");
-        note.setFont(new Font("Helvetica Neue", Font.PLAIN, 8));
+        JLabel note = new JLabel("lowest total cost  |  best comfort level");
+        note.setFont(new Font("Segoe UI", Font.PLAIN, 9));
         note.setForeground(new Color(160, 160, 160));
         note.setHorizontalAlignment(SwingConstants.CENTER);
         
@@ -559,70 +766,41 @@ public class CarRentalGUI extends JFrame {
     private void showNoCarsReceipt(int passengers) {
         receiptPanel.removeAll();
         
-        addReceiptSection("UNAVAILABLE");
-        
         JPanel message = new JPanel();
         message.setLayout(new BoxLayout(message, BoxLayout.Y_AXIS));
         message.setBackground(CARD_BG);
-        message.setBorder(new EmptyBorder(30, 20, 30, 20));
+        message.setBorder(new EmptyBorder(40, 20, 40, 20));
         
-        JLabel text = new JLabel("no cars available for");
-        text.setFont(new Font("Helvetica Neue", Font.PLAIN, 11));
-        text.setForeground(new Color(100, 100, 100));
+        JLabel icon = new JLabel("[-]");
+        icon.setFont(new Font("Segoe UI", Font.PLAIN, 48));
+        icon.setForeground(WARNING);
+        icon.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        JLabel title = new JLabel("No Cars Available");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        title.setForeground(WARNING);
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        JLabel text = new JLabel("No cars can accommodate " + passengers + " passengers");
+        text.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         text.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        JLabel number = new JLabel(String.valueOf(passengers) + " passengers");
-        number.setFont(new Font("Helvetica Neue", Font.BOLD, 14));
-        number.setForeground(WARNING);
-        number.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        JLabel tip = new JLabel("maximum capacity: 7");
-        tip.setFont(new Font("Helvetica Neue", Font.ITALIC, 9));
-        tip.setForeground(new Color(160, 160, 160));
+        JLabel tip = new JLabel("Maximum capacity is 7 passengers");
+        tip.setFont(new Font("Segoe UI", Font.ITALIC, 10));
+        tip.setForeground(new Color(140, 140, 140));
         tip.setAlignmentX(Component.CENTER_ALIGNMENT);
         
+        message.add(icon);
+        message.add(Box.createRigidArea(new Dimension(0, 15)));
+        message.add(title);
+        message.add(Box.createRigidArea(new Dimension(0, 8)));
         message.add(text);
-        message.add(Box.createRigidArea(new Dimension(0, 5)));
-        message.add(number);
         message.add(Box.createRigidArea(new Dimension(0, 5)));
         message.add(tip);
         
         receiptPanel.add(message);
         receiptPanel.revalidate();
         receiptPanel.repaint();
-        
-        statusLabel.setText("● no cars for " + passengers + " passengers");
-    }
-    
-    private void showErrorReceipt(String message) {
-        receiptPanel.removeAll();
-        
-        addReceiptSection("ERROR");
-        
-        JPanel errorPanel = new JPanel();
-        errorPanel.setLayout(new BoxLayout(errorPanel, BoxLayout.Y_AXIS));
-        errorPanel.setBackground(CARD_BG);
-        errorPanel.setBorder(new EmptyBorder(30, 20, 30, 20));
-        
-        JLabel text = new JLabel("◉");
-        text.setFont(new Font("Helvetica Neue", Font.PLAIN, 30));
-        text.setForeground(WARNING);
-        text.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        JLabel errorMsg = new JLabel(message);
-        errorMsg.setFont(new Font("Helvetica Neue", Font.PLAIN, 11));
-        errorMsg.setForeground(WARNING);
-        errorMsg.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        errorPanel.add(text);
-        errorPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        errorPanel.add(errorMsg);
-        
-        receiptPanel.add(errorPanel);
-        receiptPanel.revalidate();
-        receiptPanel.repaint();
-        
-        statusLabel.setText("● error: " + message);
     }
     
     private JPanel createFooter() {
@@ -631,12 +809,12 @@ public class CarRentalGUI extends JFrame {
         footer.setBorder(new EmptyBorder(15, 0, 0, 0));
         
         statusLabel = new JLabel("● ready");
-        statusLabel.setFont(new Font("Helvetica Neue", Font.PLAIN, 10));
-        statusLabel.setForeground(new Color(140, 140, 140));
+        statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        statusLabel.setForeground(new Color(80, 80, 80));
         
-        JLabel securityLabel = new JLabel("least privilege • fail safe • compartmentalized");
-        securityLabel.setFont(new Font("Helvetica Neue", Font.PLAIN, 9));
-        securityLabel.setForeground(new Color(180, 180, 180));
+        JLabel securityLabel = new JLabel("least privilege  |  fail safe  |  compartmentalized  |  input validation");
+        securityLabel.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+        securityLabel.setForeground(new Color(160, 160, 160));
         
         footer.add(statusLabel, BorderLayout.WEST);
         footer.add(securityLabel, BorderLayout.EAST);
@@ -646,9 +824,9 @@ public class CarRentalGUI extends JFrame {
     
     private void updateStatus() {
         if (allCars != null && !allCars.isEmpty()) {
-            statusLabel.setText("● ready | " + allCars.size() + " cars in fleet");
+            statusLabel.setText("● ready  |  " + allCars.size() + " vehicles in fleet");
         } else {
-            statusLabel.setText("● error: no cars loaded");
+            statusLabel.setText("! error: no vehicles loaded");
         }
     }
     
