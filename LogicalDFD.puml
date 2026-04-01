@@ -1,0 +1,84 @@
+' To View : Install "PlantUML" extension , Press Alt + D to preview
+@startuml
+!theme plain
+skinparam backgroundColor #FAFAFC
+skinparam componentStyle rectangle
+skinparam defaultFontName "Segoe UI"
+
+title Car Rental System - Logical DFD (What the system does)
+
+actor "User" as USER
+
+' ==================== PROCESSES ====================
+rectangle "CAR RENTAL SYSTEM" {
+    
+    rectangle "Process 1\nGet Trip Details" as P1 #LightYellow {
+        note right
+            <b>AUTHENTICATION</b>
+            Verify user input is valid
+        end note
+    }
+    
+    rectangle "Process 2\nFilter by Capacity" as P2 #LightGreen {
+        note right
+            <b>AUTHORIZATION</b>
+            Only show cars user can rent
+        end note
+    }
+    
+    rectangle "Process 3\nCalculate Cost" as P3 #LightCoral {
+        note right
+            <b>INTEGRITY</b>
+            Accurate calculations
+        end note
+    }
+    
+    rectangle "Process 4\nFind Best Car" as P4 #LightBlue {
+        note right
+            Sort by cost then comfort
+        end note
+    }
+    
+    rectangle "Process 5\nDisplay Results" as P5 #LightGray
+}
+
+' ==================== DATA STORES ====================
+database "Data Store 1\nCar Inventory" as D1 #LightGray
+
+' ==================== FLOWS ====================
+USER --> P1 : "passengers, days, miles"
+P1 --> USER : "error if invalid"
+
+P1 --> P2 : "validated trip details"
+
+P2 ..> D1 : "request cars"
+D1 --> P2 : "all cars"
+
+P2 --> P3 : "eligible cars"
+
+P3 --> P4 : "cars with cost"
+
+P4 --> P5 : "best car(s)"
+
+P5 --> USER : "make, model, passengers, cost"
+
+' ==================== SECURITY NOTES ====================
+note right of D1
+    <b>FAIL SAFE</b>
+    Returns empty list if error
+end note
+
+note bottom of P4
+    <b>LEAST PRIVILEGE</b>
+    Only best car(s) shown
+end note
+
+legend right
+    |<back:#LightYellow> Authentication Process</back>|
+    |<back:#LightGreen> Authorization Process</back>|
+    |<back:#LightCoral> Integrity Process</back>|
+    |<back:#LightBlue> Business Logic</back>|
+    |<back:#LightGray> Data Storage</back>|
+endlegend
+
+@enduml

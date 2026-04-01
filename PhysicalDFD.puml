@@ -1,0 +1,124 @@
+' To View : Install "PlantUML" extension , Press Alt + D to preview
+@startuml
+!theme plain
+skinparam backgroundColor #FAFAFC
+skinparam componentStyle rectangle
+skinparam defaultFontName "Segoe UI"
+
+title Car Rental System - Physical DFD (How the system does it)
+
+actor "User" as USER
+
+' ==================== PHYSICAL COMPONENTS ====================
+rectangle "CAR RENTAL SYSTEM" {
+    
+    ' Input Layer
+    rectangle "INPUT LAYER" #LightYellow {
+        component "CarRentalGUI\n(Input Form)" as GUI
+        component "InputValidator.java\n(validatePassengers, validateDays, validateMileage)" as VALIDATOR
+        component "Arabic Numeral\nConverter" as CONVERTER
+    }
+    
+    ' Business Logic Layer
+    rectangle "BUSINESS LOGIC LAYER" #LightGreen {
+        component "CarFilterService.java\n(filterByPassengers)" as FILTER
+        component "CostCalculator.java\n(calculateTotalCost)" as CALC
+        component "CarFilterService.java\n(findBestCars)" as SORTER
+    }
+    
+    ' Data Access Layer
+    rectangle "DATA ACCESS LAYER" #LightCoral {
+        component "CarLoader.java\n(loadCars)" as LOADER
+        component "HierarchyLoader.java\n(getHierarchyData)" as HIERARCHY
+    }
+    
+    ' Output Layer
+    rectangle "OUTPUT LAYER" #LightGray {
+        component "CarRentalGUI\n(Receipt Panel)" as RECEIPT
+        component "showReceipt()\nshowNoCarsReceipt()" as DISPLAY
+    }
+}
+
+' ==================== DATA STORES ====================
+database "data/cars.json" as JSON #LightBlue
+database "Hierarchy Data\n(in-memory map)" as HIER_MAP #LightBlue
+
+' ==================== FLOWS ====================
+
+' User Input Flow
+USER --> GUI : "types data"
+GUI --> CONVERTER : "user input string"
+CONVERTER --> VALIDATOR : "english numerals"
+VALIDATOR --> GUI : "error message if invalid"
+
+' Validated Flow
+VALIDATOR --> FILTER : "passengers, days, miles"
+
+' Data Retrieval Flow
+FILTER --> LOADER : "request all cars"
+LOADER ..> JSON : "read file"
+JSON --> LOADER : "JSON data"
+LOADER --> FILTER : "List<ICar>"
+
+FILTER --> HIERARCHY : "get car hierarchy data"
+HIERARCHY ..> HIER_MAP : "lookup rates"
+HIERARCHY --> FILTER : "HierarchyData"
+
+' Authorization Flow
+FILTER --> CALC : "eligible cars"
+
+' Calculation Flow
+CALC --> SORTER : "cars with total cost"
+
+' Sorting Flow
+SORTER --> RECEIPT : "best car(s)"
+
+' Output Flow
+RECEIPT --> DISPLAY : "format results"
+DISPLAY --> USER : "receipt with car details"
+
+' ==================== SECURITY NOTES ====================
+note right of VALIDATOR
+    <b>AUTHENTICATION</b>
+    • passengers: 1-7
+    • days: 1-365
+    • mileage: 1-100,000
+end note
+
+note right of FILTER
+    <b>AUTHORIZATION</b>
+    • if (hierarchyData.maxPassengers 
+        >= input.passengers)
+    • User only sees cars they can rent
+end note
+
+note right of CALC
+    <b>INTEGRITY</b>
+    • cost = (rate x days) 
+        + (miles / mpg x 2.25)
+    • Deterministic calculation
+end note
+
+note right of LOADER
+    <b>FAIL SAFE</b>
+    • try-catch on file read
+    • returns empty list if error
+    • never crashes
+end note
+
+note right of GUI
+    <b>LEAST PRIVILEGE</b>
+    • final fields in Car class
+    • no setters
+    • package-private constructor
+end note
+
+legend right
+    |<back:#LightYellow> Input Layer</back>|
+    |<back:#LightGreen> Business Logic</back>|
+    |<back:#LightCoral> Data Access</back>|
+    |<back:#LightGray> Output Layer</back>|
+    |<back:#LightBlue> Data Storage</back>|
+endlegend
+
+@enduml
