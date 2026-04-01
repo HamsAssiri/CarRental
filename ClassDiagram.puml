@@ -1,0 +1,219 @@
+' To View : Install "PlantUML" extension , Press Alt + D to preview
+
+@startuml
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FAFAFC
+skinparam classBackgroundColor #FFFFFF
+skinparam classBorderColor #E6E6EB
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+
+title Car Rental System - Class Diagram
+
+' ==================== PACKAGE: GUI ====================
+package "gui" {
+    class CarRentalGUI {
+        - BACKGROUND: Color
+        - CARD_BG: Color
+        - PRIMARY: Color
+        - ACCENT: Color
+        - BORDER: Color
+        - SUCCESS: Color
+        - WARNING: Color
+        - ERROR_BG: Color
+        - ERROR_BORDER: Color
+        - INFO_ICON: Color
+        - passengersField: JTextField
+        - daysField: JTextField
+        - mileageField: JTextField
+        - calculateButton: JButton
+        - receiptPanel: JPanel
+        - receiptScrollPane: JScrollPane
+        - statusLabel: JLabel
+        - errorDialog: JDialog
+        - errorMessageArea: JTextArea
+        - allCars: List<ICar>
+        - carLoader: CarLoader
+        - filterService: CarFilterService
+        - costCalculator: CostCalculator
+        --
+        + CarRentalGUI()
+        - setupUI()
+        - createHeader(): JPanel
+        - createInputPanel(): JPanel
+        - createReceiptPanel(): JPanel
+        - createFooter(): JPanel
+        - createErrorDialog()
+        - showErrorDialog(message: String)
+        - calculateBestCar()
+        - showReceipt(cars: List<CarWithDetails>, input: UserInput)
+        - showNoCarsReceipt(passengers: int)
+        - showWelcomeReceipt()
+        - showLoadingReceipt()
+        + main(args: String[])
+    }
+}
+
+' ==================== PACKAGE: MODEL ====================
+package "model" {
+    interface ICar {
+        + getName(): String
+        + getCategory(): String
+        + getHierarchy(): String
+        + getGas(): int
+    }
+    
+    class Car {
+        - name: String
+        - category: String
+        - hierarchy: String
+        - gas: int
+        --
+        + getName(): String
+        + getCategory(): String
+        + getHierarchy(): String
+        + getGas(): int
+    }
+    
+    class CarLoader {
+        --
+        + loadCars(): List<ICar>
+        - extractValue(entry: String, key: String): String
+    }
+    
+    class CarWithDetails {
+        - car: ICar
+        - hierarchyData: HierarchyData
+        - totalCost: double
+        --
+        + getCar(): ICar
+        + getHierarchyData(): HierarchyData
+        + getTotalCost(): double
+        + setTotalCost(totalCost: double)
+        + getName(): String
+        + getGas(): int
+        + getCategory(): String
+        + getHierarchy(): String
+        + getDailyRate(): double
+        + getMaxPassengers(): int
+        + getComfortLevel(): String
+    }
+    
+    class HierarchyData {
+        - hierarchy: String
+        - dailyRate: double
+        - maxPassengers: int
+        - comfortLevel: String
+        --
+        + getHierarchy(): String
+        + getDailyRate(): double
+        + getMaxPassengers(): int
+        + getComfortLevel(): String
+    }
+    
+    class HierarchyLoader {
+        - hierarchyMap: Map<String, HierarchyData>
+        --
+        + HierarchyLoader()
+        - loadHierarchies()
+        + getHierarchyData(hierarchy: String): HierarchyData
+        + isValidHierarchy(hierarchy: String): boolean
+    }
+    
+    class UserInput {
+        - passengers: int
+        - days: int
+        - mileage: int
+        --
+        + UserInput(passengers: int, days: int, mileage: int)
+        + getPassengers(): int
+        + getDays(): int
+        + getMileage(): int
+    }
+    
+    ICar <|.. Car
+    CarLoader ..> Car : creates
+    CarWithDetails o-- ICar
+    CarWithDetails o-- HierarchyData
+    HierarchyLoader ..> HierarchyData : contains
+    UserInput ..> InputValidator : uses
+}
+
+' ==================== PACKAGE: SERVICE ====================
+package "service" {
+    class CarFilterService {
+        - hierarchyLoader: HierarchyLoader
+        --
+        + CarFilterService()
+        + filterByPassengers(cars: List<ICar>, input: UserInput): List<CarWithDetails>
+        + findBestCars(cars: List<CarWithDetails>): List<CarWithDetails>
+        - compareComfortLevel(comfort1: String, comfort2: String): int
+        - getComfortValue(comfort: String): int
+    }
+    
+    class CostCalculator {
+        - GAS_PRICE: double
+        --
+        + calculateTotalCost(car: CarWithDetails, input: UserInput): double
+        + calculateAllCosts(cars: List<CarWithDetails>, input: UserInput)
+    }
+    
+    CarFilterService ..> HierarchyLoader : uses
+    CarFilterService ..> CarWithDetails : returns
+    CostCalculator ..> CarWithDetails : uses
+}
+
+' ==================== PACKAGE: VALIDATION ====================
+package "validation" {
+    class InputValidator {
+        - MAX_PASSENGERS: int
+        - MAX_DAYS: int
+        - MAX_MILEAGE: int
+        --
+        + validatePassengers(p: int): boolean
+        + validateDays(d: int): boolean
+        + validateMileage(m: int): boolean
+    }
+}
+
+' ==================== DEPENDENCIES ====================
+CarRentalGUI ..> CarLoader : uses
+CarRentalGUI ..> CarFilterService : uses
+CarRentalGUI ..> CostCalculator : uses
+CarRentalGUI ..> InputValidator : uses
+CarRentalGUI ..> UserInput : creates
+
+CarFilterService ..> InputValidator : uses (indirect)
+
+' ==================== LEGEND ====================
+note right of Car
+  <b>SECURITY PRINCIPLES:</b>
+  • Least Privilege (final fields)
+  • Integrity (no setters)
+  • Immutability
+end note
+
+note right of CarLoader
+  <b>SECURITY PRINCIPLES:</b>
+  • Fail Safe Default
+  • Minimize Trust Surface
+  • Least Privilege
+end note
+
+note right of CarFilterService
+  <b>SECURITY REQUIREMENT:</b>
+  • Authorization
+end note
+
+note right of InputValidator
+  <b>SECURITY REQUIREMENT:</b>
+  • Authentication
+end note
+
+note right of CostCalculator
+  <b>SECURITY REQUIREMENT:</b>
+  • Integrity
+end note
+
+@enduml

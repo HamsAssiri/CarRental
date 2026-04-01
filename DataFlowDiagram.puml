@@ -1,0 +1,113 @@
+
+' To View : Install "PlantUML" extension , Press Alt + D to preview
+
+@startuml
+!theme plain
+skinparam backgroundColor #FAFAFC
+skinparam componentStyle rectangle
+skinparam defaultFontName "Segoe UI"
+
+title Car Rental System - Data Flow Diagram with Security Nodes
+
+' ==================== EXTERNAL ENTITIES ====================
+actor "User" as USER #LightBlue
+
+' ==================== SYSTEM BOUNDARY ====================
+rectangle "SYSTEM BOUNDARY" {
+    
+    ' ==================== AUTHENTICATION NODE ====================
+    rectangle "AUTHENTICATION NODE" #LightYellow {
+        component "Input Validation" as VALIDATE
+        component "Arabic Numeral\nConversion" as CONVERT
+        note right of VALIDATE
+            <b>Security Requirement:</b>
+            • Validate passengers (1-7)
+            • Validate days (1-365)
+            • Validate mileage (1-100,000)
+        end note
+    }
+    
+    ' ==================== AUTHORIZATION NODE ====================
+    rectangle "AUTHORIZATION NODE" #LightGreen {
+        component "Filter by Passengers" as FILTER
+        note right of FILTER
+            <b>Security Requirement:</b>
+            • Only cars with maxPassengers
+              >= user passengers
+            • Users cannot see cars they
+              can't rent
+        end note
+    }
+    
+    ' ==================== INTEGRITY NODE ====================
+    rectangle "INTEGRITY NODE" #LightCoral {
+        component "Cost Calculator" as CALC
+        component "Immutable Car Objects" as IMMUTABLE
+        note right of CALC
+            <b>Security Requirement:</b>
+            • Deterministic calculations
+            • Same input = same output
+        end note
+    }
+    
+    ' ==================== DATA STORAGE ====================
+    database "cars.json" as JSON #LightGray
+}
+
+' ==================== FLOWS ====================
+
+' User Input Flow
+USER --> VALIDATE : "Trip Details\n(passengers, days, mileage)"
+VALIDATE --> USER : "Error Message\n(if invalid)"
+
+' Validated Data Flow
+VALIDATE --> FILTER : "Validated Input"
+
+' Data Retrieval
+FILTER ..> JSON : "Read Car Data"
+JSON --> FILTER : "Car List\n(name, category, hierarchy, gas)"
+
+' Authorization Flow
+FILTER --> CALC : "Eligible Cars\n(by passenger capacity)"
+
+' Calculation Flow
+CALC --> IMMUTABLE : "Calculate Cost"
+IMMUTABLE --> CALC : "Total Cost"
+
+' Output Flow
+CALC --> USER : "Recommended Car(s)\n(Make, Model, Passengers, Total Cost)"
+
+' ==================== SECURITY BOUNDARY NOTES ====================
+note bottom of VALIDATE
+    <b>AUTHENTICATION</b>
+    Verifies user identity
+    through input validation
+end note
+
+note bottom of FILTER
+    <b>AUTHORIZATION</b>
+    Ensures users only access
+    cars they can rent
+end note
+
+note bottom of CALC
+    <b>INTEGRITY</b>
+    Ensures calculations are
+    accurate and consistent
+end note
+
+note bottom of JSON
+    <b>FAIL SAFE</b>
+    Returns empty list
+    on read error
+end note
+
+' ==================== COLOR LEGEND ====================
+legend right
+    | <back:#LightYellow> AUTHENTICATION NODE </back> |
+    | <back:#LightGreen> AUTHORIZATION NODE </back> |
+    | <back:#LightCoral> INTEGRITY NODE </back> |
+    | <back:#LightGray> DATA STORAGE </back> |
+endlegend
+
+@enduml
