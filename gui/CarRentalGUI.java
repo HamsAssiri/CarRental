@@ -166,7 +166,7 @@ public class CarRentalGUI extends JFrame {
     header.setBackground(BACKGROUND);
     header.setBorder(new EmptyBorder(0, 0, 20, 0));
     
-    JLabel title = new JLabel("CAR RENTAL SYSTEM");
+    JLabel title = new JLabel("GoDrive Rental");
     title.setFont(new Font("Segoe UI", Font.BOLD, 28));
     title.setForeground(PRIMARY);
     
@@ -229,17 +229,17 @@ public class CarRentalGUI extends JFrame {
         panel.add(Box.createRigidArea(new Dimension(0, 20)));
         
         // Passengers with placeholder
-        passengersField = createStyledTextField("e.g., 4");
+        passengersField = createStyledTextField("Insert a Number");
         panel.add(createFieldGroup("NUMBER OF PASSENGERS", passengersField, "1-7 people"));
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
         
         // Days with placeholder
-        daysField = createStyledTextField("e.g., 5");
+        daysField = createStyledTextField("Insert a Number");
         panel.add(createFieldGroup("RENTAL DAYS", daysField, "1-365 days"));
         panel.add(Box.createRigidArea(new Dimension(0, 15)));
         
         // Mileage with placeholder
-        mileageField = createStyledTextField("e.g., 250");
+        mileageField = createStyledTextField("Insert a Number");
         panel.add(createFieldGroup("TRIP MILEAGE", mileageField, "1-100,000 miles"));
         panel.add(Box.createRigidArea(new Dimension(0, 20)));
         
@@ -460,9 +460,9 @@ public class CarRentalGUI extends JFrame {
         resetFieldBorders();
         showLoadingReceipt();
         
-        String passengersPlaceholder = "e.g., 4";
-        String daysPlaceholder = "e.g., 5";
-        String mileagePlaceholder = "e.g., 250";
+        String passengersPlaceholder = "Insert a Number";
+        String daysPlaceholder = "Insert a Number";
+        String mileagePlaceholder = "Insert a Number";
         
         String passengersStr = getActualText(passengersField, passengersPlaceholder);
         String daysStr = getActualText(daysField, daysPlaceholder);
@@ -480,9 +480,17 @@ public class CarRentalGUI extends JFrame {
         } else {
             try {
                 passengers = Integer.parseInt(passengersStr);
-                if (!InputValidator.validatePassengers(passengers)) {
+                
+                // Check if exceeds maximum capacity first
+                if (passengers > 7) {
                     highlightInvalidField(passengersField);
-                    errorMsg.append("• Passengers must be between 1 and 7\n");
+                    errorMsg.append("• Maximum capacity is 7 passengers, Please try with fewer passengers.\n");
+                    hasError = true;
+                }
+                // Then check if below minimum
+                else if (passengers < 1) {
+                    highlightInvalidField(passengersField);
+                    errorMsg.append("• Passengers must be at least 1\n");
                     hasError = true;
                 }
             } catch (NumberFormatException e) {
@@ -812,7 +820,7 @@ public class CarRentalGUI extends JFrame {
         statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         statusLabel.setForeground(new Color(80, 80, 80));
         
-        JLabel securityLabel = new JLabel("least privilege  |  fail safe  |  compartmentalized  |  input validation");
+        JLabel securityLabel = new JLabel("Software Security Project |  Hams Rawan Shahad ");
         securityLabel.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         securityLabel.setForeground(new Color(160, 160, 160));
         
